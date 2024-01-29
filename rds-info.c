@@ -75,7 +75,7 @@
 
 #define copy_into(var, data, each) ({			\
 	int __ret = 1;					\
-	memset(&var, 0, sizeof(var));			\
+	memset(&var, 0, min(each, sizeof(var)));	\
 	memcpy(&var, data, min(each, sizeof(var)));	\
 	__ret;						\
 })
@@ -223,8 +223,8 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 			  bool prt_ipv6)
 {
 	char comm[TASK_COMM_LEN];
-	struct rds6_info_socket sk6;
-	struct rds_info_socket sk;
+	struct rds6_info_socket sk6 = {};
+	struct rds_info_socket sk = {};
 	int prt_width;
 
 	if (prt_ipv6)
@@ -232,19 +232,20 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 	else
 		prt_width = PRT_IPV4_WIDTH;
 
-	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %8s %8s %10s %16s\n",
+	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %8s %16s %8s %10s %16s\n",
 	       prt_width, "BoundAddr", "BPort", prt_width, "ConnAddr", "CPort",
-	       "SndBuf", "RcvBuf", "Inode", "Cong", "Pid", "Comm");
+	       "SndBuf", "RcvBuf", "Inode", "TransName", "Cong", "Pid", "Comm");
 
 	if (prt_ipv6) {
 		for_each(sk6, data, each, len) {
-			printf("%*s %5u %*s %5u %10u %10u %8llu",
+			printf("%*s %5u %*s %5u %10u %10u %8llu %16s",
 			       prt_width, ipaddr(&sk6.bound_addr, prt_ipv6),
 			       ntohs(sk6.bound_port),
 			       prt_width, ipaddr(&sk6.connected_addr, prt_ipv6),
 			       ntohs(sk6.connected_port),
 			       sk6.sndbuf, sk6.rcvbuf,
-			       (unsigned long long)sk6.inum);
+			       (unsigned long long)sk6.inum,
+			       sk6.t_name);
 			sk6.cong = get_congested(sk6.cong);
 				printf(" %8d", sk6.cong);
 			if (get_comm(sk6.pid, comm, TASK_COMM_LEN) != -1)
@@ -253,13 +254,14 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 		}
 	} else {
 		for_each(sk, data, each, len) {
-			printf("%*s %5u %*s %5u %10u %10u %8llu",
+			printf("%*s %5u %*s %5u %10u %10u %8llu %16s",
 			       prt_width, ipaddr(&sk.bound_addr, prt_ipv6),
 			       ntohs(sk.bound_port),
 			       prt_width, ipaddr(&sk.connected_addr, prt_ipv6),
 			       ntohs(sk.connected_port),
 			       sk.sndbuf, sk.rcvbuf,
-			       (unsigned long long)sk.inum);
+			       (unsigned long long)sk.inum,
+			       sk.t_name);
 			sk.cong = get_congested(sk.cong);
 				printf(" %8d", sk.cong);
 			if (get_comm(sk.pid, comm, TASK_COMM_LEN) != -1)
