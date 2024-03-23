@@ -204,21 +204,6 @@ static int get_comm(pid_t pid, char *comm, int sz)
 	return 0;
 }
 
-/*
- * On a non supported kernel, the value in the field would be set to 0
- * and a supported kernel returns -1 to indicate a non-congested state.
- * Thus we use this function to swap the 0 and -1 values to indicate
- * a non congested state and a non-supported state.
- */
-static int get_congested(int congested)
-{
-	if (congested == 0)
-		return -1;
-	else if (congested == -1)
-		return 0;
-        return congested;
-}
-
 static void print_sockets(void *data, int each, socklen_t len, void *extra,
 			  bool prt_ipv6)
 {
@@ -232,38 +217,37 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 	else
 		prt_width = PRT_IPV4_WIDTH;
 
-	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %8s %16s %8s %10s %16s\n",
+	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %10s %16s %8s %10s %16s\n",
 	       prt_width, "BoundAddr", "BPort", prt_width, "ConnAddr", "CPort",
 	       "SndBuf", "RcvBuf", "Inode", "TransName", "Cong", "Pid", "Comm");
 
+	/* Initialize for compatibility with older kernels. */
+	sk6.cong = -1;
+	sk.cong = -1;
 	if (prt_ipv6) {
 		for_each(sk6, data, each, len) {
-			printf("%*s %5u %*s %5u %10u %10u %8llu %16s",
+			printf("%*s %5u %*s %5u %10u %10u %10llu %16s %8d",
 			       prt_width, ipaddr(&sk6.bound_addr, prt_ipv6),
 			       ntohs(sk6.bound_port),
 			       prt_width, ipaddr(&sk6.connected_addr, prt_ipv6),
 			       ntohs(sk6.connected_port),
 			       sk6.sndbuf, sk6.rcvbuf,
 			       (unsigned long long)sk6.inum,
-			       sk6.t_name);
-			sk6.cong = get_congested(sk6.cong);
-				printf(" %8d", sk6.cong);
+			       sk6.t_name, sk6.cong);
 			if (get_comm(sk6.pid, comm, TASK_COMM_LEN) != -1)
 				printf(" %10u %16s", sk6.pid, comm);
 			printf("\n");
 		}
 	} else {
 		for_each(sk, data, each, len) {
-			printf("%*s %5u %*s %5u %10u %10u %8llu %16s",
+			printf("%*s %5u %*s %5u %10u %10u %10llu %16s %8d",
 			       prt_width, ipaddr(&sk.bound_addr, prt_ipv6),
 			       ntohs(sk.bound_port),
 			       prt_width, ipaddr(&sk.connected_addr, prt_ipv6),
 			       ntohs(sk.connected_port),
 			       sk.sndbuf, sk.rcvbuf,
 			       (unsigned long long)sk.inum,
-			       sk.t_name);
-			sk.cong = get_congested(sk.cong);
-				printf(" %8d", sk.cong);
+			       sk.t_name, sk.cong);
 			if (get_comm(sk.pid, comm, TASK_COMM_LEN) != -1)
 				printf(" %10u %16s", sk.pid, comm);
 			printf("\n");
