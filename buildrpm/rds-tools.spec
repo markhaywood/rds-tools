@@ -60,7 +60,7 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-%doc docs examples
+%doc docs examples tests
 %{_bindir}/*
 %{_mandir}/*/*
 

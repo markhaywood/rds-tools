@@ -7,4 +7,4 @@ RELEASE=1
 AC_SUBST(VERSION)
 AC_SUBST(RELEASE)
 
-AC_OUTPUT(Makefile rds-tools.spec)
+AC_OUTPUT(Makefile rds-tools.spec tests/Makefile tests/README)

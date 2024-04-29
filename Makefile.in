@@ -79,7 +79,11 @@ EXTRA_DIST := 	rds-info.1 \
 		docs/rds-architecture.txt \
 		examples/Makefile \
 		examples/rds-sample.c \
-		examples/README
+		examples/README \
+		tests/Makefile.in \
+		tests/README.in \
+		tests/siocoutq.c \
+
 
 DISTFILES := $(SOURCES) $(HEADERS) $(EXTRA_DIST)
 

@@ -1,0 +1,14 @@
+all: tests
+
+CFLAGS = -O2 -Wall -Iinclude -g
+CPPFLAGS = -DDEBUG_EXE -DRDS_VERSION=\"@VERSION@\" -MD -MP -MF $(@D)/.$(basename $(@F)).d
+
+PROGRAMS = siocoutq
+
+tests: $(PROGRAMS)
+
+clean:
+	rm -f $(PROGRAMS) *.o .*.d
+
+siocoutq: %:%.o
+	gcc $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LDLIBS)

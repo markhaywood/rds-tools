@@ -1,0 +1,30 @@
+			rds-tools unit-tests version @VERSION@
+			===================================
+Introduction
+============
+The unit tests in this directory are used to validate new features
+added to RDS. Listed below are the units tests and the feature(s)
+which they test.
+
+siocoutq.c
+	- Support for SIOCSIOCOUTQ to report outstanding sends to be
+	  pushed to the channel.
+
+<new unit-test code filename>
+	- <short description>
+
+Build instructions
+==================
+This section details the building process of the test codes.
+As a prerequisite 'rds-devel' rpm package needs to be installed.
+
+a) Using a source tarball
+	At the toplevel
+		$ autoconf
+		$ configure
+	Inside tests
+		$ make
+
+b) Using a rds-tools rpm installed
+	$ cd usr/share/doc/rds-tools/tests
+	$ make
