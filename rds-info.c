@@ -441,30 +441,30 @@ static void print_msgs(void *data, int each, socklen_t len, void *extra,
 	else
 		prt_width = PRT_IPV4_WIDTH;
 
-	printf("\n%s Message Queue:\n%*s %5s %*s %5s %4s %16s %10s\n",
+	printf("\n%s Message Queue:\n%*s %5s %*s %5s %4s %16s %10s %10s\n",
 	       (char *)extra,
 	       prt_width, "LocalAddr", "LPort", prt_width, "RemoteAddr",
-	       "RPort", "Tos", "Seq", "Bytes");
+	       "RPort", "Tos", "Seq", "Bytes", "time_ms");
 
 	if (prt_ipv6) {
 		for_each(msg6, data, each, len) {
-			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u\n",
+			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u %10llu\n",
 			       prt_width, ipaddr(&msg6.laddr, prt_ipv6),
 			       ntohs(msg6.lport),
 			       prt_width, ipaddr(&msg6.faddr, prt_ipv6),
 			       ntohs(msg6.fport),
 			       msg6.tos,
-			       (uint64_t) msg6.seq, msg6.len);
+			       (uint64_t) msg6.seq, msg6.len, msg6.txrx_ms);
 		}
 	} else {
 		for_each(msg, data, each, len) {
-			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u\n",
+			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u %10llu\n",
 			       prt_width, ipaddr(&msg.laddr, prt_ipv6),
 			       ntohs(msg.lport),
 			       prt_width, ipaddr(&msg.faddr, prt_ipv6),
 			       ntohs(msg.fport),
 			       msg.tos,
-			       (uint64_t) msg.seq, msg.len);
+			       (uint64_t) msg.seq, msg.len, msg.txrx_ms);
 		}
 	}
 }

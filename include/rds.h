@@ -231,6 +231,7 @@ struct rds_info_message {
 	__be16		fport;
 	__u8		flags;
 	__u8		tos;
+	__u64           txrx_ms;
 } __attribute__((packed));
 
 struct rds6_info_message {
@@ -242,6 +243,7 @@ struct rds6_info_message {
 	__be16		fport;
 	__u8		flags;
 	__u8		tos;
+	__u64           txrx_ms;
 } __attribute__((packed));
 
 struct rds_info_socket {
