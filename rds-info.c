@@ -510,6 +510,26 @@ static void print_tcp_socks(void *data, int each, socklen_t len, void *extra,
 	}
 }
 
+
+char* map_conn_state(int state) {
+	switch(state) {
+		case CONN_STATE_DOWN:
+			return "DOWN";
+		case CONN_STATE_CONNECTING:
+			return "CONNECTING";
+		case CONN_STATE_DISCONNECTING:
+			return "DISCONNECTING";
+		case CONN_STATE_UP:
+			return "UP";
+		case CONN_STATE_RESETTING:
+			return "RESETTING";
+		case CONN_STATE_ERROR:
+			return "ERROR";
+		default:
+			return "UNKNOWN";
+	}
+}
+
 static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 			   bool prt_ipv6)
 {
@@ -543,9 +563,9 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 		strcat(add_fields, ", rcq_irq");
 	}
 
-	printf("\nRDS IB Connections:\n%*s %*s %4s %3s %32s %32s %10s %10s",
+	printf("\nRDS IB Connections:\n%*s %*s %4s %3s %32s %32s %10s %10s %15s",
 	       prt_width, "LocalAddr", prt_width, "RemoteAddr", "Tos", "SL",
-	       "LocalDev", "RemoteDev", "SrcQPNo", "DstQPNo");
+	       "LocalDev", "RemoteDev", "SrcQPNo", "DstQPNo", "State");
 
 	if (opt_add || opt_verbose) {
 		if (strcasestr(add_fields, "cache_allocs"))
@@ -588,14 +608,15 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 
 	if (prt_ipv6) {
 		for_each(ic6, data, each, len) {
-			printf("%*s %*s %4u %3u %32s %32s %10d %10d",
+			printf("%*s %*s %4u %3u %32s %32s %10d %10d %15s",
 			       prt_width, ipaddr(&ic6.src_addr, prt_ipv6),
 			       prt_width, ipaddr(&ic6.dst_addr, prt_ipv6),
 			       ic6.tos, ic6.sl,
 			       ipv6addr(ic6.src_gid),
 			       ipv6addr(ic6.dst_gid),
 			       ic6.qp_num,
-			       ic6.dst_qp_num);
+			       ic6.dst_qp_num,
+			       map_conn_state(ic6.conn_state));
 
 			if (opt_add || opt_verbose) {
 				if (strcasestr(add_fields, "cache_allocs"))
@@ -638,14 +659,15 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 		}
 	} else {
 		for_each(ic, data, each, len) {
-			printf("%*s %*s %4u %3u %32s %32s %10d %10d",
+			printf("%*s %*s %4u %3u %32s %32s %10d %10d %15s",
 			       prt_width, ipaddr(&ic.src_addr, prt_ipv6),
 			       prt_width, ipaddr(&ic.dst_addr, prt_ipv6),
 			       ic.tos, ic.sl,
 			       ipv6addr(ic.src_gid),
 			       ipv6addr(ic.dst_gid),
 			       ic.qp_num,
-			       ic.dst_qp_num);
+			       ic.dst_qp_num,
+			       map_conn_state(ic.conn_state));
 
 			if (opt_add || opt_verbose) {
 				if (strcasestr(add_fields, "cache_allocs"))
