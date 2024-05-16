@@ -17,6 +17,8 @@ BuildRoot:	%{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 ExcludeArch:	s390 s390x
 BuildRequires:	json-c-devel
 
+BuildRequires: autoconf
+
 #
 # Packages required to build and run rds-info(1) with network namespace
 # support
@@ -44,6 +46,7 @@ how to use the socket interface.
 %setup -q
 
 %build
+autoconf
 %configure
 make CFLAGS="$CFLAGS -Iinclude" %{?_smp_mflags}
 
