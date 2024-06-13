@@ -553,6 +553,8 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 		strcat(add_fields, ", rx_poll_cnt");
 		strcat(add_fields, ", scq_vector");
 		strcat(add_fields, ", rcq_vector");
+		strcat(add_fields, ", scq_irq");
+		strcat(add_fields, ", rcq_irq");
 	}
 
 	printf("\nRDS IB Connections:\n%*s %*s %4s %3s %32s %32s %10s %10s",
@@ -590,6 +592,10 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 			printf("%15s", "Scq_vector");
 		if (strcasestr(add_fields, "rcq_vector"))
 			printf("%15s", "Rcq_vector");
+		if (strcasestr(add_fields, "scq_irq"))
+			printf("%15s", "Scq_irq");
+		if (strcasestr(add_fields, "rcq_irq"))
+			printf("%15s", "Rcq_irq");
 	}
 
 	printf("\n");
@@ -636,6 +642,10 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 					printf("%15"PRId32, ic6.scq_vector);
 				if (strcasestr(add_fields, "rcq_vector"))
 					printf("%15"PRId32, ic6.rcq_vector);
+				if (strcasestr(add_fields, "scq_irq"))
+					printf("%15"PRId32, ic6.scq_irq);
+				if (strcasestr(add_fields, "rcq_irq"))
+					printf("%15"PRId32, ic6.rcq_irq);
 			}
 
 			printf("\n");
@@ -682,6 +692,10 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 					printf("%15"PRId32, ic.scq_vector);
 				if (strcasestr(add_fields, "rcq_vector"))
 					printf("%15"PRId32, ic.rcq_vector);
+				if (strcasestr(add_fields, "scq_irq"))
+					printf("%15"PRId32, ic.scq_irq);
+				if (strcasestr(add_fields, "rcq_irq"))
+					printf("%15"PRId32, ic.rcq_irq);
 			}
 
 			printf("\n");

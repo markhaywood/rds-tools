@@ -326,6 +326,8 @@ struct rds_info_rdma_connection {
 	__u64		rx_poll_cnt;
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
+	__s32		scq_irq;
+	__s32		rcq_irq;
 };
 
 struct rds6_info_rdma_connection {
@@ -361,6 +363,8 @@ struct rds6_info_rdma_connection {
 	__u64		rx_poll_cnt;
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
+	__s32		scq_irq;
+	__s32		rcq_irq;
 };
 
 struct rds_path_info {
