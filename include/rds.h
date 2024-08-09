@@ -274,8 +274,8 @@ struct rds_info_socket {
 	__u32		rcvbuf;
 	__u64		inum;
 	pid_t		pid;
-	int32_t		cong;
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+	int32_t		cong;
 	__u8		t_name[TRANSNAMSIZ];
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 } __attribute__((packed));
@@ -289,8 +289,8 @@ struct rds6_info_socket {
 	__u32		rcvbuf;
 	__u64		inum;
 	pid_t		pid;
-	int32_t		cong;
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+	int32_t		cong;
 	__u8		t_name[TRANSNAMSIZ];
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 } __attribute__((packed));
