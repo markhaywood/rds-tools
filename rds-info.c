@@ -70,7 +70,10 @@
 	|| transport[15] & RDS_INFO_CONNECTION_FLAG_##flag ? letter : '-')
 
 #define min(a, b) (a < b ? a : b)
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define max(a, b) (a > b ? a : b)
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
+
 #define array_size(foo) (sizeof(foo) / sizeof(foo[0]))
 
 #define copy_into(var, data, each) ({			\
@@ -124,8 +127,10 @@ DECLARE_DLSYM(hash_has_key);
 #define PRT_IPV4_WIDTH	15
 #define PRT_IPV6_WIDTH	37
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define PROCPATHLEN 32
 #define TASK_COMM_LEN 16
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 /* Like inet_ntoa, but can be re-entered several times without clobbering
  * the previously returned string. */
@@ -178,6 +183,7 @@ static void print_counters(void *data, int each, socklen_t len, void *extra,
 	  printf("%32s %16"PRIu64"\n", ctr.name, (uint64_t) ctr.value);
 }
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 /* Returns 0 on success. */
 static int get_comm(pid_t pid, char *comm, int sz)
 {
@@ -203,11 +209,14 @@ static int get_comm(pid_t pid, char *comm, int sz)
 	comm[size - 1] = '\0';
 	return 0;
 }
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 static void print_sockets(void *data, int each, socklen_t len, void *extra,
 			  bool prt_ipv6)
 {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	char comm[TASK_COMM_LEN];
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	struct rds6_info_socket sk6 = {};
 	struct rds_info_socket sk = {};
 	int prt_width;
@@ -222,9 +231,9 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 	       prt_width, "BoundAddr", "BPort", prt_width, "ConnAddr", "CPort",
 	       "SndBuf", "RcvBuf", "Inode", "TransName", "Cong", "Pid", "Comm");
 #else
-	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %10s %10s %16s\n",
+	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %10s\n",
 	       prt_width, "BoundAddr", "BPort", prt_width, "ConnAddr", "CPort",
-	       "SndBuf", "RcvBuf", "Inode", "Pid", "Comm");
+	       "SndBuf", "RcvBuf", "Inode");
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 
@@ -251,9 +260,11 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 #else
 			       (unsigned long long)sk6.inum);
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			if (get_comm(sk6.pid, comm, TASK_COMM_LEN) != -1)
 				printf(" %10u %16s", sk6.pid, comm);
 			printf("\n");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 		}
 	} else {
 		for_each(sk, data, each, len) {
@@ -273,9 +284,11 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 #else
 			       (unsigned long long)sk.inum);
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			if (get_comm(sk.pid, comm, TASK_COMM_LEN) != -1)
 				printf(" %10u %16s", sk.pid, comm);
 			printf("\n");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 		}
 	}
 }
