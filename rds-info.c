@@ -293,6 +293,7 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 	}
 }
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 static void print_time(time_t time)
 {
 	char buf[128];
@@ -413,6 +414,7 @@ static void print_paths(void *data, int each, socklen_t len, void *extra,
 			printf("\n");
 	}
 }
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 static void print_conns(void *data, int each, socklen_t len, void *extra,
 			bool prt_ipv6)
@@ -826,8 +828,10 @@ struct info infos[] = {
 		print_sockets, NULL, 0 },
 	['n'] = { RDS6_INFO_CONNECTIONS, RDS_INFO_CONNECTIONS, "connections",
 		print_conns, NULL, 0 },
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	['p'] = { RDS6_INFO_CONN_PATHS, RDS_INFO_CONN_PATHS, "paths",
 		print_paths, NULL, 0 },
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	['r'] = { RDS6_INFO_RECV_MESSAGES, RDS_INFO_RECV_MESSAGES,
 		"recv queue messages", print_msgs, "Receive", 0 },
 	['s'] = { RDS6_INFO_SEND_MESSAGES, RDS_INFO_SEND_MESSAGES,

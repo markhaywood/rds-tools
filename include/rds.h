@@ -196,11 +196,11 @@ struct rds_cmsg_rx_trace {
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_INFO_RDMA_CONNECTION_STATS	10018
 #define RDS6_INFO_RDMA_CONNECTION_STATS	10019
-#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 #define RDS_INFO_CONN_PATHS		10020
 #define RDS6_INFO_CONN_PATHS		10021
 
 #define RDS_INFO_LAST			10021
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 struct rds_info_counter {
 	__u8	name[32];
@@ -404,6 +404,7 @@ struct rds6_info_rdma_connection {
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 };
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 struct rds_path_info {
 	__kernel_time_t	attempt_time;
 	__kernel_time_t	connect_time;
@@ -422,6 +423,7 @@ struct rds_info_connection_paths {
 	__u8		npaths;
 	struct rds_path_info paths[];
 } __attribute__((packed));
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 /*
  * Congestion monitoring.
