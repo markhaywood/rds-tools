@@ -595,6 +595,7 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 	if (opt_verbose && (!opt_add)) {
 		memset(add_fields, 0, ADD_FIELD_STR_LEN);
 		strcat(add_fields, "cache_allocs");
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		strcat(add_fields, ", recv_alloc_ctr");
 		strcat(add_fields, ", recv_free_ctr");
 		strcat(add_fields, ", send_alloc_ctr");
@@ -607,7 +608,6 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 		strcat(add_fields, ", rx_poll_ts");
 		strcat(add_fields, ", tx_poll_cnt");
 		strcat(add_fields, ", rx_poll_cnt");
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 		strcat(add_fields, ", scq_vector");
 		strcat(add_fields, ", rcq_vector");
 		strcat(add_fields, ", scq_irq");
@@ -628,6 +628,7 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 	if (opt_add || opt_verbose) {
 		if (strcasestr(add_fields, "cache_allocs"))
 			printf("%15s", "Cache Allocs");
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		if (strcasestr(add_fields, "recv_alloc_ctr"))
 			printf("%15s", "Recv_alloc_ctr");
 		if (strcasestr(add_fields, "recv_free_ctr"))
@@ -652,7 +653,6 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 			printf("%15s", "Tx_poll_cnt");
 		if (strcasestr(add_fields, "rx_poll_cnt"))
 			printf("%15s", "Rx_poll_cnt");
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 		if (strcasestr(add_fields, "scq_vector"))
 			printf("%15s", "Scq_vector");
 		if (strcasestr(add_fields, "rcq_vector"))
@@ -689,6 +689,7 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 			if (opt_add || opt_verbose) {
 				if (strcasestr(add_fields, "cache_allocs"))
 					printf("%15"PRIu32, ic6.cache_allocs);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 				if (strcasestr(add_fields, "recv_alloc_ctr"))
 					printf("%15"PRIu32, ic6.recv_alloc_ctr);
 				if (strcasestr(add_fields, "recv_free_ctr"))
@@ -713,7 +714,6 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 					printf("%15"PRIu64, (uint64_t) ic6.tx_poll_cnt);
 				if (strcasestr(add_fields, "rx_poll_cnt"))
 					printf("%15"PRIu64, (uint64_t) ic6.rx_poll_cnt);
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 				if (strcasestr(add_fields, "scq_vector"))
 					printf("%15"PRId32, ic6.scq_vector);
 				if (strcasestr(add_fields, "rcq_vector"))
@@ -750,6 +750,7 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 			if (opt_add || opt_verbose) {
 				if (strcasestr(add_fields, "cache_allocs"))
 					printf("%15"PRIu32, ic.cache_allocs);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 				if (strcasestr(add_fields, "recv_alloc_ctr"))
 					printf("%15"PRIu32, ic.recv_alloc_ctr);
 				if (strcasestr(add_fields, "recv_free_ctr"))
@@ -774,7 +775,6 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 					printf("%15"PRIu64, (uint64_t) ic.tx_poll_cnt);
 				if (strcasestr(add_fields, "rx_poll_cnt"))
 					printf("%15"PRIu64, (uint64_t)ic.rx_poll_cnt);
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 				if (strcasestr(add_fields, "scq_vector"))
 					printf("%15"PRId32, ic.scq_vector);
 				if (strcasestr(add_fields, "rcq_vector"))

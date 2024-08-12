@@ -344,6 +344,7 @@ struct rds_info_rdma_connection {
 	__u32		recv_alloc_ctr;
 	__u32		recv_free_ctr;
 	__s32		dst_qp_num;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u32		send_alloc_ctr;
 	__u32		send_free_ctr;
 	__u64		send_bytes;
@@ -354,7 +355,6 @@ struct rds_info_rdma_connection {
 	__u64		rx_poll_ts;
 	__u64		tx_poll_cnt;
 	__u64		rx_poll_cnt;
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
 	__s32		scq_irq;
@@ -386,6 +386,7 @@ struct rds6_info_rdma_connection {
 	__u32		recv_alloc_ctr;
 	__u32		recv_free_ctr;
 	__s32		dst_qp_num;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u32		send_alloc_ctr;
 	__u32		send_free_ctr;
 	__u64		send_bytes;
@@ -396,7 +397,6 @@ struct rds6_info_rdma_connection {
 	__u64		rx_poll_ts;
 	__u64		tx_poll_cnt;
 	__u64		rx_poll_cnt;
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
 	__s32		scq_irq;
