@@ -194,7 +194,9 @@ static struct options	rds_stress_opts;
 static int		control_fd;
 static uint64_t         rtt_threshold;
 static int              show_histogram;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 static int		reset_connection;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 static uint8_t		cancel_sent_to;
 static uint32_t		abort_after;
 static char		peer_version[VERSION_MAX_LEN];
@@ -532,7 +534,9 @@ static void usage(void)
 	" --show-outliers [rtt-time]    reports on any RTT exceeding the rtt-time (defaults to no outlier checking) \n"
 	" --show-histogram              prints an RTT histogram\n"
 	" --show-perfdata               generate perf data output for script parsing\n"
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	" --reset                       reset the connection and exit\n"
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	" --async                       enable async sends\n"
 	" --cancel-sent-to              child processes issue RDS_CANCEL_SENT_TO. Use Ctrl-C\n"
 	" --abort-after [seconds]       parent process terminates after [seconds] in the midst of operation\n"
@@ -3549,6 +3553,7 @@ static void verify_option_encdec(const struct options *opts)
 		die("encode/decode check of options struct failed\n");
 }
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 static void reset_conn(struct options *opts, bool isv6)
 {
 	struct rds_reset val;
@@ -3596,6 +3601,7 @@ static void reset_conn(struct options *opts, bool isv6)
 	}
 #endif /* WITHOUT_ORACLE_EXTENSIONS */
 }
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 static void peer_json_send(const char *json_options, int fd)
 {
@@ -3650,10 +3656,12 @@ static int active_parent(struct options *opts,
 
 	ok = 0;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (reset_connection) {
 		reset_conn(opts, isv6);
 		return 0;
 	}
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	if (opts->show_params) {
 		unsigned int k;
@@ -4071,7 +4079,9 @@ enum {
 	OPT_PERFDATA,
         OPT_SHOW_OUTLIERS,
         OPT_SHOW_HISTOGRAM,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	OPT_RESET,
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	OPT_ASYNC,
 	OPT_CANCEL_SENT_TO,
 	OPT_ABORT_AFTER,
@@ -4113,7 +4123,9 @@ static struct option long_options[] = {
 { "use-cong-monitor",	required_argument,	NULL,	OPT_USE_CONG_MONITOR },
 { "show-outliers",      required_argument,      NULL,   OPT_SHOW_OUTLIERS    },
 { "show-histogram",     no_argument,            NULL,   OPT_SHOW_HISTOGRAM   },
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 { "reset",              no_argument,            NULL,   OPT_RESET },
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 { "async",              no_argument,            NULL,   OPT_ASYNC },
 { "cancel-sent-to",     no_argument,            NULL,   OPT_CANCEL_SENT_TO },
 { "abort-after",        required_argument,      NULL,   OPT_ABORT_AFTER },
@@ -4228,7 +4240,9 @@ int main(int argc, char **argv)
 
 	rtt_threshold = ~0UL;
 	show_histogram = 0;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	reset_connection = 0;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	cancel_sent_to = 0;
 	abort_after = 0;
 
@@ -4340,9 +4354,11 @@ int main(int argc, char **argv)
 			case OPT_USE_CONG_MONITOR:
 				opts.use_cong_monitor = parse_ull(optarg, 1);
 				break;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			case OPT_RESET:
 				reset_connection = 1;
 				break;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			case OPT_ASYNC:
 				opts.async = 1;
 				break;
