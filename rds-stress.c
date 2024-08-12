@@ -94,7 +94,9 @@ struct options {
         uint32_t        rdma_alignment;
         uint32_t        connect_retries;
         uint8_t         tos;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
         uint8_t         async;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
         struct in6_addr send_addr6;
         struct in6_addr receive_addr6;
         uint32_t        addr_scope_id;	/* only meaningful locally */
@@ -176,7 +178,9 @@ static struct rs_option rs_options[] = {
 	{ "rdma_alignment", RS_OPTION_UINT32, offsetof(struct options, rdma_alignment) },
 	{ "connect_retries", RS_OPTION_UINT32, offsetof(struct options, connect_retries) },
 	{ "tos", RS_OPTION_UINT8, offsetof(struct options, tos) },
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	{ "async", RS_OPTION_UINT8, offsetof(struct options, async) },
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	{ "send_addr6", RS_OPTION_V6ADDR, offsetof(struct options, send_addr6) },
 	{ "receive_addr6", RS_OPTION_V6ADDR, offsetof(struct options, receive_addr6) },
 	{ "addr_scope_id ", RS_OPTION_UINT32, offsetof(struct options, addr_scope_id) },
@@ -328,10 +332,12 @@ struct header {
 	uint32_t	rdma_size;
 	uint32_t        rdma_vector;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	/* Async send related. */
 	uint8_t         retry;
 	uint8_t         rdma_remote_err;
 	uint8_t         pending;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	uint8_t         data[0];
 } __attribute__((packed));
@@ -357,10 +363,12 @@ struct header_v6 {
 	uint32_t	rdma_size;
 	uint32_t        rdma_vector;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	/* Async send related. */
 	uint8_t         retry;
 	uint8_t         rdma_remote_err;
 	uint8_t         pending;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	/* Add padding to make the IPv6 address 32 bit aligned.*/
 	uint8_t		padding;
@@ -537,7 +545,9 @@ static void usage(void)
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 	" --reset                       reset the connection and exit\n"
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	" --async                       enable async sends\n"
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	" --cancel-sent-to              child processes issue RDS_CANCEL_SENT_TO. Use Ctrl-C\n"
 	" --abort-after [seconds]       parent process terminates after [seconds] in the midst of operation\n"
 	" --always-bursty               always flip-flop between send-only, then receive-only mode\n"
@@ -675,7 +685,9 @@ static void encode_hdr(struct header_v6 *dst, const struct header_v6 *hdr,
 	dst->rdma_key = htonll(hdr->rdma_key);
 	dst->rdma_size = htonl(hdr->rdma_size);
 	dst->rdma_vector = htonl(hdr->rdma_vector);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	dst->retry = hdr->retry;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 }
 
 static void decode_hdr(struct header_v6 *dst, const struct header_v6 *hdr,
@@ -705,7 +717,9 @@ static void decode_hdr(struct header_v6 *dst, const struct header_v6 *hdr,
 	dst->rdma_key = ntohll(hdr->rdma_key);
 	dst->rdma_size = ntohl(hdr->rdma_size);
 	dst->rdma_vector = ntohl(hdr->rdma_vector);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	dst->retry = hdr->retry;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 }
 
 static void fill_hdr(void *message, uint32_t bytes, struct header_v6 *hdr_v6,
@@ -755,17 +769,23 @@ static int check_hdr(void *message, uint32_t bytes, struct header_v6 *hdr_v6,
 		     struct options *opts, bool isv6)
 {
 	struct header_v6	msghdr;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	uint32_t		inc_seq;
 	uint32_t		my_seq;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	size_t			hdr_size;
 
 	decode_hdr(&msghdr, message, isv6);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	inc_seq = msghdr.seq;
 	my_seq = hdr_v6->seq;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	hdr_size = isv6 ? sizeof(struct header_v6) : sizeof(struct header);
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (msghdr.retry && (inc_seq < my_seq))
 		return -1;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	if (memcmp(&msghdr, hdr_v6, BASIC_HEADER_SIZE) ||
 	    (isv6 && memcmp(&msghdr.from_addr_v6, &hdr_v6->from_addr_v6,
@@ -823,7 +843,11 @@ static int check_hdr(void *message, uint32_t bytes, struct header_v6 *hdr_v6,
 		 * with stdout() and we don't get things stomping on each
 		 * other
 		 */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		printf( "An incoming message had a %s header which\n"
+#else
+		printf( "An incoming message had a header which\n"
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			"didn't contain the fields we expected:\n"
 			"    member %37s eq %37s\n"
 			"       seq %37u %s %37u\n"
@@ -833,7 +857,10 @@ static int check_hdr(void *message, uint32_t bytes, struct header_v6 *hdr_v6,
 			"   to_port %37u %s %37u\n"
 			"     index %37u %s %37u\n"
 			"        op %37u %s %37u\n",
-			(msghdr.retry) ? "RETRY" : "", "expected", "got",
+#ifndef WITHOUT_ORACLE_EXTENSIONS
+			(msghdr.retry) ? "RETRY" : "",
+#endif
+			"expected", "got",
 			bleh(seq, /**/),
 			bleh_addr(from),
 			bleh(from_port, ntohs),
@@ -1247,11 +1274,13 @@ static void rds_compare_buffer(uint64_t *addr, int size, uint64_t pattern)
 			(unsigned long long) pattern, addr);
 }
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 struct retry_entry {
 	uint32_t	retries;
 	uint32_t	seq;
 	int		status;
 };
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 struct task {
 	unsigned int		nr;
@@ -1271,14 +1300,17 @@ struct task {
 	uint16_t		rdma_rd_recv_index;
 	struct timeval		*send_time;
 	struct header_v6	*ack_header;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	struct header_v6	*ack2_header;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	struct header_v6	*rdma_rd_ack_header;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	struct header_v6	*req_header;
 	uint64_t		*retry_token;
 	uint32_t		retries;
 	uint32_t            	last_retry_seq;
 	uint32_t		retry_index;
-
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	/* RDMA related stuff */
 	uint64_t **		local_buf;
@@ -1427,8 +1459,10 @@ static void rdma_mark_completed(struct task *tasks, uint64_t token, int status,
 {
 	struct task *t;
 	unsigned int i;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	struct header_v6 *hdr = NULL;
 	uint32_t seq = token >> 32;
+#endif
 	unsigned int type = token & 0x03;
 	unsigned int index = (token & 0xFFFFFFFF) >> 2;
 
@@ -1437,12 +1471,14 @@ static void rdma_mark_completed(struct task *tasks, uint64_t token, int status,
 	t = &tasks[index / rds_stress_opts.req_depth];
 	i = index % rds_stress_opts.req_depth;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (opts->async) {
 		if (type == OP_REQ)
 			hdr = &t->req_header[i];
 		else
 			hdr = &t->ack2_header[i];
 	}
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	if (status) {
 		const char *errmsg;
@@ -1480,6 +1516,7 @@ static void rdma_mark_completed(struct task *tasks, uint64_t token, int status,
 		      type ? "SEND" : "RDMA",
 		      errmsg);
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		if (hdr &&
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 			(status == RDS_RDMA_SEND_DROPPED ||
@@ -1512,6 +1549,7 @@ static void rdma_mark_completed(struct task *tasks, uint64_t token, int status,
 		hdr->pending = 0;
 		hdr->retry = 0;
 		hdr->rdma_remote_err = 0;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	}
 
 	if (type == OP_ONLY_RDMA_RD)
@@ -1622,6 +1660,7 @@ static void rdma_build_cmsg_xfer(struct msghdr *msg,
 	rdma_put_cmsg(msg, RDS_CMSG_RDMA_ARGS, &args, sizeof(args));
 }
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 static void build_cmsg_async_send(struct msghdr *msg, uint64_t user_token)
 {
 	struct rds_asend_args  args;
@@ -1630,6 +1669,7 @@ static void build_cmsg_async_send(struct msghdr *msg, uint64_t user_token)
 	args.user_token = user_token;
 	rdma_put_cmsg(msg, RDS_CMSG_ASYNC_SEND, &args, sizeof(args));
 }
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 static void rdma_build_cmsg_dest(struct msghdr *msg, rds_rdma_cookie_t rdma_dest)
 {
@@ -1750,8 +1790,13 @@ static int send_msg(int fd, struct task *t, struct header_v6 *hdr,
 	/* If this is an ACK/RDMA Rd packet with RDMA, build the cmsg
 	   * header that goes with it. */
 	if ((hdr->op == OP_ACK || hdr->op == OP_ONLY_RDMA_RD) &&
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	    hdr->rdma_op != 0 &&
 	    !hdr->rdma_remote_err) {
+#else
+	    hdr->rdma_op != 0) {
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
+
 		unsigned int qindex = hdr->index;
 		unsigned int type = (hdr->op == OP_ONLY_RDMA_RD) ?
 			OP_ONLY_RDMA_RD : 0;
@@ -1776,6 +1821,7 @@ static int send_msg(int fd, struct task *t, struct header_v6 *hdr,
 		rdma_build_cmsg_xfer(&msg, hdr, token,
 				t->local_buf[qindex]);
 		rdma_flight_recorder = &t->rdma_inflight[qindex];
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	} else if (opts->async) {
 		if (hdr->op == OP_REQ)
 			build_cmsg_async_send(&msg,
@@ -1785,6 +1831,7 @@ static int send_msg(int fd, struct task *t, struct header_v6 *hdr,
 			build_cmsg_async_send(&msg,
 				rdma_user_token(t, hdr->index, OP_ACK,
 				hdr->seq));
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	}
 
 	if (hdr->op == OP_REQ && hdr->rdma_op != 0) {
@@ -1816,7 +1863,9 @@ static int send_msg(int fd, struct task *t, struct header_v6 *hdr,
 		rdma_key_o_meter_add(cookie);
 	}
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	hdr->pending = 1;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	return ret;
 }
@@ -1843,6 +1892,7 @@ static int send_packet(int fd, struct task *t,
 	return ret;
 }
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 static int resend_packet(int fd, struct task *t,
 			 struct header_v6 *hdr, unsigned int size,
 			 struct options *opts, struct child_control *ctl,
@@ -1854,6 +1904,7 @@ static int resend_packet(int fd, struct task *t,
 
 	return ret;
 }
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 static int send_one(int fd, struct task *t,
 		    struct options *opts,
@@ -1861,16 +1912,23 @@ static int send_one(int fd, struct task *t,
 {
 	struct timeval start;
 	struct timeval stop;
-	struct header_v6 *hdr = &t->req_header[t->send_index];
+#ifndef WITHOUT_ORACLE_EXTENSIONS
+	struct header_v6 *hdrp = &t->req_header[t->send_index];
+#else
+	struct header_v6 hdr;
+	struct header_v6 *hdrp = &hdr;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	int ret;
 
-	if (opts->async && hdr->pending) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
+	if (opts->async && hdrp->pending) {
 		return -1;
 	}
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
-	build_header(t, hdr, OP_REQ, t->send_index, isv6);
+	build_header(t, hdrp, OP_REQ, t->send_index, isv6);
 	if (opts->rdma_size && t->send_seq > 10)
-		rdma_build_req(fd, hdr, t,
+		rdma_build_req(fd, hdrp, t,
 				opts->rdma_size,
 				opts->req_depth,
 				opts->rw_mode,
@@ -1878,7 +1936,7 @@ static int send_one(int fd, struct task *t,
 
 
 	gettimeofday(&start, NULL);
-	ret = send_packet(fd, t, hdr, opts->req_size, opts, ctl, isv6);
+	ret = send_packet(fd, t, hdrp, opts->req_size, opts, ctl, isv6);
 	gettimeofday(&stop, NULL);
 
 	if (ret < 0)
@@ -1902,15 +1960,19 @@ static int send_ack(int fd, struct task *t, unsigned int qindex,
 		    bool isv6, bool is_rdma_ack)
 {
 	struct header_v6 *hdr = &t->ack_header[qindex];
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	struct header_v6 *hdr2 = &t->ack2_header[qindex];
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	ssize_t ret;
 
 	if (is_rdma_ack)
 		hdr = &t->rdma_rd_ack_header[qindex];
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (opts->async && hdr2->pending) {
 		return -1;
 	}
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	/* send an ack in response to the req we just got */
 	ret = send_packet(fd, t, hdr, opts->ack_size, opts, ctl, isv6);
@@ -1938,7 +2000,9 @@ static int send_ack(int fd, struct task *t, unsigned int qindex,
 
 	stat_inc(&ctl->cur[S_ACK_TX_BYTES], ret);
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	memcpy(hdr2, hdr, sizeof(*hdr2));
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	return ret;
 }
@@ -1991,6 +2055,7 @@ static int send_anything(int fd, struct task *t,
 			 struct child_control *ctl,
 			 int can_send, int do_work, bool isv6)
 {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	struct header_v6 *hdr;
 	unsigned int index;
 	int req_size;
@@ -2031,6 +2096,7 @@ next:
 		num_retries--;
 	}
 	t->last_retry_seq = t->retries = 0;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	if (ack_anything(fd, t, opts, ctl, can_send, isv6) < 0)
 		return -1;
@@ -2405,7 +2471,9 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 	struct task tasks[opts->nr_tasks];
 	struct timeval start;
         int do_work = opts->simplex ? active : 1;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	int j;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	size_t addr_size;
 
 	if (isv6) {
@@ -2482,6 +2550,7 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 		memset(tasks[i].ack_header, 0, opts->req_depth *
 		       sizeof(struct header_v6));
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		tasks[i].ack2_header = malloc(opts->req_depth *
 					      sizeof(struct header_v6));
 		if (!tasks[i].ack2_header) {
@@ -2492,15 +2561,15 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 
 		for (j=0;j<opts->req_depth;j++)
 			tasks[i].ack2_header[j].pending = 0;
-
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 		tasks[i].rdma_rd_ack_header = malloc(opts->req_depth *
 					      sizeof(struct header_v6));
 		if (!tasks[i].rdma_rd_ack_header)
 			die("ERROR: failed to alloc memory\n");
-
 		memset(tasks[i].rdma_rd_ack_header, 0, opts->req_depth *
 		       sizeof(struct header_v6));
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		for (j = 0; j < opts->req_depth; j++)
 			tasks[i].rdma_rd_ack_header[j].pending = 0;
 
@@ -2514,12 +2583,15 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 
 		for (j=0;j<opts->req_depth;j++)
 			tasks[i].req_header[j].pending = 0;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		tasks[i].retry_token = malloc(2 * opts->req_depth * sizeof(uint64_t));
 		if (!tasks[i].retry_token) {
 			die("ERROR: failed to alloc memory\n");
 		}
 		memset(tasks[i].retry_token, 0, 2 * opts->req_depth * sizeof(uint64_t));
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 		tasks[i].rdma_next_op = (i & 1)? RDMA_OP_READ : RDMA_OP_WRITE;
 	}
@@ -3480,7 +3552,9 @@ static void encode_options(struct options *dst,
         dst->rw_mode = src->rw_mode;                    /* byte sized */
         dst->rdma_vector = htonl(src->rdma_vector);
 	dst->tos = src->tos;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	dst->async = src->async;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	(void) memmove(&dst->send_addr6, &src->send_addr6,
 		       sizeof(dst->send_addr6));
@@ -3523,7 +3597,9 @@ static void decode_options(struct options *dst,
         dst->rw_mode = src->rw_mode;                    /* byte sized */
 	dst->rdma_vector = ntohl(src->rdma_vector);
 	dst->tos = src->tos;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	dst->async = src->async;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	(void) memmove(&dst->send_addr6, &src->send_addr6,
 		       sizeof(dst->send_addr6));
@@ -3749,7 +3825,12 @@ static int active_parent(struct options *opts,
 	 */
 	encode_options(&enc_options, opts);
 	/* Use the new options_v6 to send to IPv6 peer. */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (isv6 || opts->tos || opts->async || use_json)
+#else
+	if (isv6 || opts->tos || use_json)
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
+
 		peer_send(fd, &enc_options, isv6 ? OPTIONS_V3_SIZE :
 			  OPTIONS_V2_SIZE);
 	else
@@ -4082,7 +4163,9 @@ enum {
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 	OPT_RESET,
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	OPT_ASYNC,
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	OPT_CANCEL_SENT_TO,
 	OPT_ABORT_AFTER,
 	OPT_DISABLE_RDS_INQ,
@@ -4126,7 +4209,9 @@ static struct option long_options[] = {
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 { "reset",              no_argument,            NULL,   OPT_RESET },
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 { "async",              no_argument,            NULL,   OPT_ASYNC },
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 { "cancel-sent-to",     no_argument,            NULL,   OPT_CANCEL_SENT_TO },
 { "abort-after",        required_argument,      NULL,   OPT_ABORT_AFTER },
 #ifndef WITHOUT_ORACLE_EXTENSIONS
@@ -4229,8 +4314,8 @@ int main(int argc, char **argv)
         opts.rw_mode = 0;
 	opts.rdma_vector = 1;
 	opts.tos = 0;
-	opts.async = 0;
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+	opts.async = 0;
 	opts.inq_enabled = 1;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	opts.always_bursty = 0;
@@ -4359,9 +4444,11 @@ int main(int argc, char **argv)
 				reset_connection = 1;
 				break;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			case OPT_ASYNC:
 				opts.async = 1;
 				break;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			case OPT_CANCEL_SENT_TO:
 				cancel_sent_to = 1;
 				break;
@@ -4420,9 +4507,11 @@ int main(int argc, char **argv)
 	else if (opts.rdma_cache_mrs && !opts.rdma_use_get_mr)
 		die("option --rdma-cache-mrs conflicts with --rdma-use-get-mr=0\n");
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (opts.async && opts.rdma_size && !opts.rdma_use_fence &&
 	    (opts.rw_mode == RDMA_OP_READ || opts.rw_mode == M_RDMA_READWRITE))
 		die("option --async=1 with RDMA Rd require --rdma-use-fence=1\n");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	/* the passive parent will read options off the wire */
 	if (!set_send_addr)
