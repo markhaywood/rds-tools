@@ -73,7 +73,11 @@
 #define RDS_CONG_MONITOR		6
 #define RDS_GET_MR_FOR_DEST		7
 #define RDS_CONN_RESET                  8
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define SO_RDS_TRANSPORT		9
+#else
+#define SO_RDS_TRANSPORT		8
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 /* Socket option to tap receive path latency
  *	SO_RDS: SO_RDS_MSG_RXPATH_LATENCY
  *	Format used struct rds_rx_trace_so
@@ -102,9 +106,11 @@
 */
 #define SIOCRDSSETTOS                   (SIOCPROTOPRIVATE)
 #define SIOCRDSGETTOS                   (SIOCPROTOPRIVATE + 1)
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define SIOCRDSENABLENETFILTER          (SIOCPROTOPRIVATE + 2)
 
 #define IPPROTO_OKA (142)
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 typedef __u8	rds_tos_t;
 
@@ -143,8 +149,13 @@ struct rds_cmsg_rx_trace {
  *	R_Key along in an RDS extension header.
  *	The cmsg_data is a struct rds_get_mr_args,
  *	the same as for the GET_MR setsockopt.
+#ifndef WITHOUT_ORACLE_EXTENSIONS
  * RDS_CMSG_RDMA_SEND_STATUS (recvmsg)
  *	Returns the status of a completed RDMA/async send operation.
+#else
+ * RDS_CMSG_RDMA_STATUS (recvmsg)
+ *	Returns the status of a completed RDMA operation.
+#endif
  * RDS_CMSG_RXPATH_LATENCY(recvmsg)
  *	Returns rds message latencies in various stages of receive
  *	path in nS. Its set per socket using SO_RDS_MSG_RXPATH_LATENCY
@@ -339,13 +350,13 @@ struct rds_info_rdma_connection {
 	__u8            conn_state;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	__u32		cache_allocs;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u32		frag;
 	__u16		flow_ctl_post_credit;
 	__u16		flow_ctl_send_credit;
 	__s32		qp_num;
 	__u32		recv_alloc_ctr;
 	__u32		recv_free_ctr;
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__s32		dst_qp_num;
 	__u32		send_alloc_ctr;
 	__u32		send_free_ctr;
@@ -381,13 +392,13 @@ struct rds6_info_rdma_connection {
 	__u8            conn_state;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	__u32		cache_allocs;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u32		frag;
 	__u16		flow_ctl_post_credit;
 	__u16		flow_ctl_send_credit;
 	__s32		qp_num;
 	__u32		recv_alloc_ctr;
 	__u32		recv_free_ctr;
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__s32		dst_qp_num;
 	__u32		send_alloc_ctr;
 	__u32		send_free_ctr;
@@ -512,8 +523,30 @@ struct rds_atomic_args {
 	rds_rdma_cookie_t cookie;
 	__u64		local_addr;
 	__u64		remote_addr;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u64		swap_add;
 	__u64		compare;
+#else
+	union {
+		struct {
+			__u64		compare;
+			__u64		swap;
+		} cswp;
+		struct {
+			__u64		add;
+		} fadd;
+		struct {
+			__u64		compare;
+			__u64		swap;
+			__u64		compare_mask;
+			__u64		swap_mask;
+		} m_cswp;
+		struct {
+			__u64		add;
+			__u64		nocarry_mask;
+		} m_fadd;
+	};
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	__u64		flags;
 	__u64		user_token;
 };
@@ -542,12 +575,19 @@ struct rds_rdma_send_notify {
 	__s32		status;
 };
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_RDMA_SEND_SUCCESS		0
 #define RDS_RDMA_REMOTE_ERROR		1
 #define RDS_RDMA_SEND_CANCELED		2
 #define RDS_RDMA_SEND_DROPPED		3
 #define RDS_RDMA_SEND_OTHER_ERROR	4
-
+#else
+#define RDS_RDMA_SUCCESS		0
+#define RDS_RDMA_REMOTE_ERROR		1
+#define RDS_RDMA_CANCELED		2
+#define RDS_RDMA_DROPPED		3
+#define RDS_RDMA_OTHER_ERROR		4
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 /*
  * Common set of flags for all RDMA related structs
  */
@@ -561,6 +601,7 @@ struct rds_rdma_send_notify {
 #define RDS_RDMA_REMOTE_COMPLETE 0x0080 /* Notify when data is available */
 #define RDS_SEND_NOTIFY_ME      0x0100  /* Notify when operation completes */
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 /* netfilter related components */
 struct rds_nf_hdr {
 	struct in6_addr	saddr;     /* source address of request */
@@ -593,6 +634,7 @@ enum rds_hook_priorities {
 	NF_RDS_PRI_OKA   = 0,
 	NF_RDS_PRI_LAST  = INT_MAX
 };
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 enum {

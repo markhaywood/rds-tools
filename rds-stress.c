@@ -1446,11 +1446,23 @@ static void rdma_mark_completed(struct task *tasks, uint64_t token, int status,
 		switch (status) {
 		case RDS_RDMA_REMOTE_ERROR:
 			errmsg = "remote error"; break;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		case RDS_RDMA_SEND_DROPPED:
+#else
+		case RDS_RDMA_DROPPED:
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 			errmsg = "operation was dropped"; break;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		case RDS_RDMA_SEND_CANCELED:
+#else
+		case RDS_RDMA_CANCELED:
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 			errmsg = "operation was cancelled"; break;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		case RDS_RDMA_SEND_OTHER_ERROR:
+#else
+		case RDS_RDMA_OTHER_ERROR:
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 			errmsg = "other error"; break;
 		default:
 			errmsg = "unknown error"; break;
@@ -1465,7 +1477,11 @@ static void rdma_mark_completed(struct task *tasks, uint64_t token, int status,
 		      errmsg);
 
 		if (hdr &&
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			(status == RDS_RDMA_SEND_DROPPED ||
+#else
+			(status == RDS_RDMA_DROPPED ||
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 			 status == RDS_RDMA_REMOTE_ERROR)) {
 
 			if (hdr->seq == seq) {
