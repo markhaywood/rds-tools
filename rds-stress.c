@@ -98,7 +98,9 @@ struct options {
         struct in6_addr send_addr6;
         struct in6_addr receive_addr6;
         uint32_t        addr_scope_id;	/* only meaningful locally */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	uint8_t		inq_enabled;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	/*
 	 * When adding new options they should be added at end of this structure and they
 	 * also need to be added to the rs_options struct below. The command line processing
@@ -122,7 +124,12 @@ struct options {
  */
 #define	OPTIONS_V1_SIZE		offsetof(struct options, tos) - offsetof(struct options, req_depth)
 #define	OPTIONS_V2_SIZE		offsetof(struct options, send_addr6)
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define	OPTIONS_V3_SIZE		offsetof(struct options, inq_enabled)
+#else
+#define	OPTIONS_V3_SIZE		offsetof(struct options, always_bursty)
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
+
 
 enum rs_option_type {
 	RS_OPTION_V6ADDR = 0,
@@ -173,7 +180,9 @@ static struct rs_option rs_options[] = {
 	{ "send_addr6", RS_OPTION_V6ADDR, offsetof(struct options, send_addr6) },
 	{ "receive_addr6", RS_OPTION_V6ADDR, offsetof(struct options, receive_addr6) },
 	{ "addr_scope_id ", RS_OPTION_UINT32, offsetof(struct options, addr_scope_id) },
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	{ "disable_inq", RS_OPTION_UINT8, offsetof(struct options, inq_enabled) },
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	{ "always_bursty", RS_OPTION_UINT8, offsetof(struct options, always_bursty) },
 	{ "sync_always_bursty", RS_OPTION_UINT8, offsetof(struct options, sync_always_bursty) },
 	{ NULL, 0, 0 }
@@ -510,8 +519,10 @@ static void usage(void)
 	" --rdma-alignment [alignment]     request a buffer alignment to test unaligned RDMA (default is 0)\n"
 	" --rdma-key-o-meter               used to track whether RDS zerocopy code issues repeating R_Keys\n"
         "                                  disabled by default)\n"
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	" --disable-inq			   disables RDS-INQ control message response from recvmsg syscall\n"
 	"				   (default is enabled)\n"
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	"\n"
 	"Optional flags:\n"
 	" -c, --report-cpu              measure cpu use with per-cpu soak processes\n"
@@ -2025,7 +2036,9 @@ static int recv_message(int fd,
 			struct timeval *tstamp,
 			struct task *tasks,
 			struct options *opts,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			int *more_data_inq,
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 			bool isv6)
 {
 	struct cmsghdr *cmsg;
@@ -2036,11 +2049,13 @@ static int recv_message(int fd,
 	size_t addr_size;
 	size_t hdr_size;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	/* When RDS_INQ option is not provided in the command,
 	 * then assign -1 to *more_data_inq. Thus, run_child()
 	 * treats it as a boolean TRUE.
 	 */
 	*more_data_inq = -1;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	memset(&msg, 0, sizeof(msg));
 	msg.msg_name = (struct sockaddr *)sp;
@@ -2104,9 +2119,11 @@ static int recv_message(int fd,
 			rdma_mark_completed(tasks, notify.user_token,
 					    notify.status, opts, isv6);
 			break;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		case RDS_CMSG_INQ:
 			*more_data_inq = *((int *) CMSG_DATA(cmsg));
 			break;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 		}
 	}
 	return ret;
@@ -2116,7 +2133,10 @@ static int recv_one(int fd, struct task *tasks,
 		    struct options *opts,
 		    struct child_control *ctl,
 		    struct child_control *all_ctl,
-		    int *more_data_inq, bool isv6)
+#ifndef WITHOUT_ORACLE_EXTENSIONS
+		    int *more_data_inq,
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
+		    bool isv6)
 {
 	char buf[max(opts->req_size, opts->ack_size)];
 	rds_rdma_cookie_t rdma_dest = 0;
@@ -2131,7 +2151,12 @@ static int recv_one(int fd, struct task *tasks,
 
 
 	ret = recv_message(fd, buf, sizeof(buf), &rdma_dest, &sp, &tstamp,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			   tasks, opts, more_data_inq, isv6);
+#else
+			   tasks, opts, isv6);
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
+
 	if (ret < 0)
 		return ret;
 
@@ -2350,7 +2375,11 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 	enum burst_mode burst_mode;
 	union sockaddr_ip sp;
 	struct pollfd pfd;
-	int fd, inq, semid;
+	int fd;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
+	int inq;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
+	int semid;
 	uint16_t i;
 	ssize_t ret;
 	struct task tasks[opts->nr_tasks];
@@ -2480,10 +2509,12 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 
 	fd = rds_socket(opts, &sp, addr_size);
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	inq = opts->inq_enabled;
 	if (inq && setsockopt(fd, SOL_RDS, SO_RDS_INQ, &inq, sizeof(inq)))
 		fprintf(stderr, "Setting RDS_INQ flag failed errno = %d \n",
 			errno);
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 	if (opts->sync_always_bursty)
 		semid = get_sysv_sem();
@@ -2513,7 +2544,10 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 	pfd.events = POLLIN | POLLOUT;
 	while (1) {
 		struct task *t;
-		int can_send, more_data_inq;
+		int can_send;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
+		int more_data_inq;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 		int all_clear, all_full;
 
 		check_parent(parent_pid, fd, isv6, opts);
@@ -2535,9 +2569,15 @@ static void run_child(pid_t parent_pid, struct child_control *ctl,
 		pfd.events = POLLIN;
 
 		if (pfd.revents & POLLIN) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			while (recv_one(fd, tasks, opts, ctl, all_ctl,
-					&more_data_inq, isv6) >= 0 &&
+					&more_data_inq,	isv6) >= 0 &&
 			       more_data_inq)
+#else
+			while (recv_one(fd, tasks, opts, ctl, all_ctl,
+					isv6) >= 0)
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
+
 				;
 		}
 
@@ -3731,8 +3771,10 @@ static int active_parent(struct options *opts,
 }
 
 static int passive_parent(union sockaddr_ip *addr, uint16_t port,
-			  uint8_t inq_enabled, struct soak_control *soak_arr,
-			  bool isv6)
+#ifndef WITHOUT_ORACLE_EXTENSIONS
+			  uint8_t inq_enabled,
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
+			 struct soak_control *soak_arr, bool isv6)
 {
 	struct options remote_v6, *opts;
 	struct child_control *ctl = NULL;
@@ -3844,7 +3886,9 @@ static int passive_parent(union sockaddr_ip *addr, uint16_t port,
 		opts->receive_addr = ntohl(addr->addr4_addr);
 	}
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	opts->inq_enabled = inq_enabled;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	rds_stress_opts = *opts;
 
 	/* Wait for "GO" from the initiating peer */
@@ -4047,7 +4091,9 @@ static struct option long_options[] = {
 { "async",              no_argument,            NULL,   OPT_ASYNC },
 { "cancel-sent-to",     no_argument,            NULL,   OPT_CANCEL_SENT_TO },
 { "abort-after",        required_argument,      NULL,   OPT_ABORT_AFTER },
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 { "disable-inq",	no_argument,		NULL,	OPT_DISABLE_RDS_INQ },
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 { "always-bursty",      no_argument,            NULL,   OPT_ALWAYS_BURSTY },
 { "sync-always-bursty", no_argument,            NULL,   OPT_SYNC_ALWAYS_BURSTY },
 { NULL }
@@ -4061,9 +4107,11 @@ static int process_json_option(int c, struct options *opts)
 	int ret = 0;
 
 	switch(c) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		case OPT_DISABLE_RDS_INQ:
 			opts->inq_enabled = 0;
 			break;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 		case OPT_ALWAYS_BURSTY:
 			opts->always_bursty = 1;
 			break;
@@ -4144,7 +4192,9 @@ int main(int argc, char **argv)
 	opts.rdma_vector = 1;
 	opts.tos = 0;
 	opts.async = 0;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	opts.inq_enabled = 1;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	opts.always_bursty = 0;
 	opts.sync_always_bursty = 0;
 	memset(opts.version, '\0', VERSION_MAX_LEN);
@@ -4335,7 +4385,11 @@ int main(int argc, char **argv)
 	/* the passive parent will read options off the wire */
 	if (!set_send_addr)
 		return passive_parent(&recv_addr, opts.starting_port,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 				      opts.inq_enabled, soak_arr, isv6);
+#else
+				      soak_arr, isv6);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	/* If user does not specify an ack size, use the minimum size. */
 	if (opts.ack_size == 0) {

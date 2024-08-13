@@ -75,11 +75,13 @@
  */
 #define SO_RDS_MSG_RXPATH_LATENCY	10
 #define RDS6_CONN_RESET			11
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 /* Socket option to enable notify via control
  * message when more bytes are available to
  * read.
  */
 #define SO_RDS_INQ			12
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 /* supported values for SO_RDS_TRANSPORT */
 #define	RDS_TRANS_IB	0
@@ -144,9 +146,11 @@ struct rds_cmsg_rx_trace {
  *	socket option. Legitimate points are defined in
  *	enum rds_message_rxpath_latency. More points can be added in
  *	future. CSMG format is struct rds_cmsg_rx_trace.
+#ifndef WITHOUT_ORACLE_EXTENSIONS
  * RDS_CMSG_INQ
  * 	When enabled from socket options, this control message returns
  * 	the pending bytes yet to be read from this receive queue.
+#endif
  */
 #define RDS_CMSG_RDMA_ARGS		1
 #define RDS_CMSG_RDMA_DEST		2
@@ -159,7 +163,9 @@ struct rds_cmsg_rx_trace {
 #define RDS_CMSG_MASKED_ATOMIC_CSWP	9
 #define RDS_CMSG_ASYNC_SEND		10
 #define RDS_CMSG_RXPATH_LATENCY		11
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_CMSG_INQ			12
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 #define RDS_INFO_FIRST			10000
 #define RDS_INFO_COUNTERS		10000
