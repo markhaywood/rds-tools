@@ -354,9 +354,9 @@ struct rds_info_rdma_connection {
 	__u64		rx_poll_ts;
 	__u64		tx_poll_cnt;
 	__u64		rx_poll_cnt;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__s32		scq_irq;
 	__s32		rcq_irq;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
@@ -396,9 +396,9 @@ struct rds6_info_rdma_connection {
 	__u64		rx_poll_ts;
 	__u64		tx_poll_cnt;
 	__u64		rx_poll_cnt;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__s32		scq_irq;
 	__s32		rcq_irq;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
@@ -482,7 +482,7 @@ struct rds_get_mr_for_dest_args {
 	struct sockaddr_storage	dest_addr;
 #endif
 #else
-	struct __kernel_sockaddr_storage dest_addr;
+	struct sockaddr_storage	dest_addr;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	struct rds_iovec	vec;
