@@ -635,9 +635,9 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 	       prt_width, "LocalAddr", prt_width, "RemoteAddr", "Tos", "SL",
 	       "LocalDev", "RemoteDev", "SrcQPNo", "DstQPNo", "State");
 #else
-	printf("\nRDS IB Connections:\n%*s %*s %4s %3s %32s %32s %10s %10s",
+	printf("\nRDS IB Connections:\n%*s %*s %4s %3s %32s %32s %10s",
 	       prt_width, "LocalAddr", prt_width, "RemoteAddr", "Tos", "SL",
-	       "LocalDev", "RemoteDev", "SrcQPNo", "DstQPNo");
+	       "LocalDev", "RemoteDev", "SrcQPNo");
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	if (opt_add || opt_verbose) {
@@ -686,19 +686,19 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %*s %4u %3u %32s %32s %10d %10d %15s",
 #else
-			printf("%*s %*s %4u %3u %32s %32s %10d %10d",
+			printf("%*s %*s %4u %3u %32s %32s %10d",
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&ic6.src_addr, prt_ipv6),
 			       prt_width, ipaddr(&ic6.dst_addr, prt_ipv6),
 			       ic6.tos, ic6.sl,
 			       ipv6addr(ic6.src_gid),
 			       ipv6addr(ic6.dst_gid),
-			       ic6.qp_num,
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+			       ic6.qp_num,
 			       ic6.dst_qp_num,
 			       map_conn_state(ic6.conn_state));
 #else
-			       ic6.dst_qp_num);
+			       ic6.qp_num);
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 			if (opt_add || opt_verbose) {
@@ -747,19 +747,19 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %*s %4u %3u %32s %32s %10d %10d %15s",
 #else
-			printf("%*s %*s %4u %3u %32s %32s %10d %10d",
+			printf("%*s %*s %4u %3u %32s %32s %10d",
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&ic.src_addr, prt_ipv6),
 			       prt_width, ipaddr(&ic.dst_addr, prt_ipv6),
 			       ic.tos, ic.sl,
 			       ipv6addr(ic.src_gid),
 			       ipv6addr(ic.dst_gid),
-			       ic.qp_num,
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+			       ic.qp_num,
 			       ic.dst_qp_num,
 			       map_conn_state(ic.conn_state));
 #else
-			       ic.dst_qp_num);
+			       ic.qp_num);
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 			if (opt_add || opt_verbose) {

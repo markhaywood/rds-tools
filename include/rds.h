@@ -343,8 +343,8 @@ struct rds_info_rdma_connection {
 	__s32		qp_num;
 	__u32		recv_alloc_ctr;
 	__u32		recv_free_ctr;
-	__s32		dst_qp_num;
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+	__s32		dst_qp_num;
 	__u32		send_alloc_ctr;
 	__u32		send_free_ctr;
 	__u64		send_bytes;
@@ -385,8 +385,8 @@ struct rds6_info_rdma_connection {
 	__s32		qp_num;
 	__u32		recv_alloc_ctr;
 	__u32		recv_free_ctr;
-	__s32		dst_qp_num;
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+	__s32		dst_qp_num;
 	__u32		send_alloc_ctr;
 	__u32		send_free_ctr;
 	__u64		send_bytes;
