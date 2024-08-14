@@ -40,6 +40,7 @@
  */
 
 #include <linux/types.h>
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 /* XXX <net/sock.h> was included as part of NETFILTER support (commit f13bbf62)
  * but <net/sock.h> is not exported to uapi, although <linux/rds.h> is
  * (in theory). Is <net/sock.h> needed for user-apps that use netfilter?
@@ -53,6 +54,10 @@
 #include <limits.h>
 #include <netinet/in.h>
 #endif
+#else
+#include <linux/socket.h>               /* For __kernel_sockaddr_storage. */
+#include <linux/in6.h>                  /* For struct in6_addr. */
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 #define RDS_IB_ABI_VERSION		0x301
 
@@ -468,11 +473,15 @@ struct rds_get_mr_args {
 };
 
 struct rds_get_mr_for_dest_args {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #ifdef __KERNEL__
 	struct __kernel_sockaddr_storage dest_addr;
 #else
 	struct sockaddr_storage	dest_addr;
 #endif
+#else
+	struct __kernel_sockaddr_storage dest_addr;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	struct rds_iovec	vec;
 	__u64			cookie_addr;
 	__u64			flags;
