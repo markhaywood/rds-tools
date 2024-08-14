@@ -193,8 +193,10 @@ struct rds_cmsg_rx_trace {
 #define RDS6_INFO_SOCKETS		10015
 #define RDS6_INFO_TCP_SOCKETS		10016
 #define RDS6_INFO_IB_CONNECTIONS	10017
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_INFO_RDMA_CONNECTION_STATS	10018
 #define RDS6_INFO_RDMA_CONNECTION_STATS	10019
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 #define RDS_INFO_CONN_PATHS		10020
 #define RDS6_INFO_CONN_PATHS		10021
 
@@ -482,6 +484,7 @@ struct rds_get_mr_for_dest_args {
 #else
 	struct __kernel_sockaddr_storage dest_addr;
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+
 	struct rds_iovec	vec;
 	__u64			cookie_addr;
 	__u64			flags;
