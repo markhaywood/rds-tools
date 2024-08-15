@@ -79,8 +79,8 @@
  *	Format used struct rds_rx_trace_so
  */
 #define SO_RDS_MSG_RXPATH_LATENCY	10
-#define RDS6_CONN_RESET			11
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+#define RDS6_CONN_RESET			11
 /* Socket option to enable notify via control
  * message when more bytes are available to
  * read.
@@ -231,7 +231,9 @@ struct rds6_info_connection {
 	struct in6_addr	faddr;
 	__u8		transport[TRANSNAMSIZ];		/* null term ascii */
 	__u8		flags;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u8		tos;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 } __attribute__((packed));
 
 #define RDS_INFO_MESSAGE_FLAG_ACK               0x01
@@ -522,11 +524,13 @@ struct rds_reset {
 	struct in_addr	dst;
 };
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 struct rds6_reset {
 	__u8		tos;
 	struct in6_addr	src;
 	struct in6_addr	dst;
 };
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 struct rds_asend_args {
 	__u64		user_token;

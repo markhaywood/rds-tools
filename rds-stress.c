@@ -3536,11 +3536,14 @@ static void verify_option_encdec(const struct options *opts)
 static void reset_conn(struct options *opts, bool isv6)
 {
 	struct rds_reset val;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	struct rds6_reset val6;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	int fd;
 	union sockaddr_ip sp;
 	size_t addr_size;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (isv6) {
 		sp.addr6_family = AF_INET6;
 		sp.addr6_port = 0;
@@ -3551,6 +3554,7 @@ static void reset_conn(struct options *opts, bool isv6)
 		val6.src = opts->receive_addr6;
 		val6.dst = opts->send_addr6;
 	} else {
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 		sp.addr4_family = AF_INET;
 		sp.addr4_port = 0;
 		sp.addr4_addr = htonl(opts->receive_addr);
@@ -3559,16 +3563,22 @@ static void reset_conn(struct options *opts, bool isv6)
 		val.tos = opts->tos;
 		val.src.s_addr = htonl(opts->receive_addr);
 		val.dst.s_addr = htonl(opts->send_addr);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	}
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 	fd = bound_socket(pf, SOCK_SEQPACKET, 0, &sp, addr_size);
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	if (isv6) {
 		if (setsockopt(fd, sol, RDS6_CONN_RESET, &val6, sizeof(val6)))
 			die_errno("setsockopt RDS6_CONN_RESET failed");
 	} else {
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 		if (setsockopt(fd, sol, RDS_CONN_RESET, &val, sizeof(val)))
 			die_errno("setsockopt RDS_CONN_RESET failed");
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	}
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 }
 
 static void peer_json_send(const char *json_options, int fd)

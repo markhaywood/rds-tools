@@ -434,10 +434,16 @@ static void print_conns(void *data, int each, socklen_t len, void *extra,
 
 	if (prt_ipv6) {
 		for_each(conn6, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %*s %4u %16"PRIu64" %16"PRIu64" %c%c%c%c\n",
+#else
+			printf("%*s %*s %16"PRIu64" %16"PRIu64" %c%c%c%c\n",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&conn6.laddr, prt_ipv6),
 			       prt_width, ipaddr(&conn6.faddr, prt_ipv6),
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       conn6.tos,
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       (uint64_t) conn6.next_tx_seq,
 			       (uint64_t) conn6.next_rx_seq,
 			       rds_conn_flag(conn6.flags, SENDING,
