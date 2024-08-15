@@ -100,6 +100,10 @@
 #define	RDS_TRANS_TCP	2
 #define	RDS_TRANS_COUNT	3
 #define	RDS_TRANS_NONE	(~0)
+#ifdef WITHOUT_ORACLE_EXTENSIONS
+/* don't use RDS_TRANS_IWARP - it is deprecated */
+#define RDS_TRANS_IWARP RDS_TRANS_GAP
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 
 /*
  * ioctl commands for SOL_RDS
@@ -187,6 +191,9 @@ struct rds_cmsg_rx_trace {
 #define RDS_CMSG_RXPATH_LATENCY		11
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_CMSG_INQ			12
+#else
+#define	RDS_CMSG_ZCOPY_COOKIE		12
+#define	RDS_CMSG_ZCOPY_COMPLETION	13
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 #define RDS_INFO_FIRST			10000
@@ -326,6 +333,9 @@ struct rds_info_tcp_socket {
 	__u32           last_sent_nxt;
 	__u32           last_expected_una;
 	__u32           last_seen_una;
+#ifdef WITHOUT_ORACLE_EXTENSIONS
+	__u8		tos;
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 } __attribute__((packed));
 
 struct rds6_info_tcp_socket {
@@ -599,6 +609,12 @@ struct rds_rdma_notify {
 #define RDS_RDMA_CANCELED		2
 #define RDS_RDMA_DROPPED		3
 #define RDS_RDMA_OTHER_ERROR		4
+
+#define RDS_MAX_ZCOOKIES		8
+struct rds_zcopy_cookies {
+	__u32 num;
+	__u32 cookies[RDS_MAX_ZCOOKIES];
+};
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 /*
