@@ -2170,7 +2170,11 @@ static int recv_message(int fd,
 
 	/* See if the message comes with a RDMA destination */
 	for (cmsg = CMSG_FIRSTHDR(&msg); cmsg; cmsg = CMSG_NXTHDR(&msg, cmsg)) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		struct rds_rdma_send_notify notify;
+#else
+		struct rds_rdma_notify notify;
+#endif
 
 		if (cmsg->cmsg_level != sol)
 			continue;
@@ -2198,7 +2202,12 @@ static int recv_message(int fd,
 			memcpy(cookie, CMSG_DATA(cmsg), sizeof(*cookie));
 			break;
 
+
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		case RDS_CMSG_RDMA_SEND_STATUS:
+#else
+		case RDS_CMSG_RDMA_STATUS:
+#endif /* WITHOUT_ORACLE_EXTENSIONS */
 			if (cmsg->cmsg_len < CMSG_LEN(sizeof(notify)))
 				die("RDS_CMSG_RDMA_DEST data too small");
 			memcpy(&notify, CMSG_DATA(cmsg), sizeof(notify));

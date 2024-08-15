@@ -72,8 +72,8 @@
 #define RDS_RECVERR			5
 #define RDS_CONG_MONITOR		6
 #define RDS_GET_MR_FOR_DEST		7
-#define RDS_CONN_RESET                  8
 #ifndef WITHOUT_ORACLE_EXTENSIONS
+#define RDS_CONN_RESET                  8
 #define SO_RDS_TRANSPORT		9
 #else
 #define SO_RDS_TRANSPORT		8
@@ -171,13 +171,19 @@ struct rds_cmsg_rx_trace {
 #define RDS_CMSG_RDMA_ARGS		1
 #define RDS_CMSG_RDMA_DEST		2
 #define RDS_CMSG_RDMA_MAP		3
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_CMSG_RDMA_SEND_STATUS	4
+#else
+#define RDS_CMSG_RDMA_STATUS		4
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 #define RDS_CMSG_CONG_UPDATE		5
 #define RDS_CMSG_ATOMIC_FADD		6
 #define RDS_CMSG_ATOMIC_CSWP		7
 #define RDS_CMSG_MASKED_ATOMIC_FADD	8
 #define RDS_CMSG_MASKED_ATOMIC_CSWP	9
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_CMSG_ASYNC_SEND		10
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 #define RDS_CMSG_RXPATH_LATENCY		11
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_CMSG_INQ			12
@@ -221,7 +227,9 @@ struct rds_info_counter {
 #define RDS_INFO_CONNECTION_FLAG_SENDING	0x01
 #define RDS_INFO_CONNECTION_FLAG_CONNECTING	0x02
 #define RDS_INFO_CONNECTION_FLAG_CONNECTED	0x04
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_INFO_CONNECTION_FLAG_ERROR		0x08
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 #define TRANSNAMSIZ	16
 
@@ -551,26 +559,30 @@ struct rds_atomic_args {
 	__u64		user_token;
 };
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 struct rds_reset {
 	__u8		tos;
 	struct in_addr	src;
 	struct in_addr	dst;
 };
 
-#ifndef WITHOUT_ORACLE_EXTENSIONS
 struct rds6_reset {
 	__u8		tos;
 	struct in6_addr	src;
 	struct in6_addr	dst;
 };
-#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 struct rds_asend_args {
 	__u64		user_token;
 	__u64		flags;
 };
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 struct rds_rdma_send_notify {
+#else
+struct rds_rdma_notify {
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	__u64		user_token;
 	__s32		status;
 };
@@ -588,6 +600,7 @@ struct rds_rdma_send_notify {
 #define RDS_RDMA_DROPPED		3
 #define RDS_RDMA_OTHER_ERROR		4
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
+
 /*
  * Common set of flags for all RDMA related structs
  */
@@ -598,8 +611,10 @@ struct rds_rdma_send_notify {
 #define RDS_RDMA_DONTWAIT	0x0010	/* Don't wait in SET_BARRIER */
 #define RDS_RDMA_NOTIFY_ME	0x0020	/* Notify when operation completes */
 #define RDS_RDMA_SILENT		0x0040	/* Do not interrupt remote */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define RDS_RDMA_REMOTE_COMPLETE 0x0080 /* Notify when data is available */
 #define RDS_SEND_NOTIFY_ME      0x0100  /* Notify when operation completes */
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 /* netfilter related components */

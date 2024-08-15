@@ -437,7 +437,7 @@ static void print_conns(void *data, int each, socklen_t len, void *extra,
 #ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %*s %4u %16"PRIu64" %16"PRIu64" %c%c%c%c\n",
 #else
-			printf("%*s %*s %16"PRIu64" %16"PRIu64" %c%c%c%c\n",
+			printf("%*s %*s %16"PRIu64" %16"PRIu64" %c%c%c\n",
 #endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&conn6.laddr, prt_ipv6),
 			       prt_width, ipaddr(&conn6.faddr, prt_ipv6),
@@ -450,14 +450,23 @@ static void print_conns(void *data, int each, socklen_t len, void *extra,
 					     conn6.transport, 's'),
 			       rds_conn_flag(conn6.flags, CONNECTING,
 					     conn6.transport, 'c'),
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       rds_conn_flag(conn6.flags, CONNECTED,
 					     conn6.transport, 'C'),
 			       rds_conn_flag(conn6.flags, ERROR,
 					     conn6.transport, 'E'));
+#else
+			       rds_conn_flag(conn6.flags, CONNECTED,
+					     conn6.transport, 'C'));
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 		}
 	} else {
 		for_each(conn, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %*s %4u %16"PRIu64" %16"PRIu64" %c%c%c%c\n",
+#else
+			printf("%*s %*s %4u %16"PRIu64" %16"PRIu64" %c%c%c\n",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&conn.laddr, prt_ipv6),
 			       prt_width, ipaddr(&conn.faddr, prt_ipv6),
 			       conn.tos,
@@ -467,10 +476,16 @@ static void print_conns(void *data, int each, socklen_t len, void *extra,
 					     conn.transport, 's'),
 			       rds_conn_flag(conn.flags, CONNECTING,
 					     conn.transport, 'c'),
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       rds_conn_flag(conn.flags, CONNECTED,
 					     conn.transport, 'C'),
 			       rds_conn_flag(conn.flags, ERROR,
 					     conn.transport, 'E'));
+#else
+			       rds_conn_flag(conn.flags, CONNECTED,
+					     conn.transport, 'C'));
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
+
 		}
 	}
 }
