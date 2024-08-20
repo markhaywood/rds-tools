@@ -343,8 +343,10 @@ struct rds_info_rdma_connection {
 	__u64		rx_poll_cnt;
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__s32		scq_irq;
 	__s32		rcq_irq;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 };
 
 struct rds6_info_rdma_connection {
@@ -383,8 +385,10 @@ struct rds6_info_rdma_connection {
 	__u64		rx_poll_cnt;
 	int32_t		scq_vector;
 	int32_t		rcq_vector;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__s32		scq_irq;
 	__s32		rcq_irq;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 };
 
 struct rds_path_info {

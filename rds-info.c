@@ -609,8 +609,10 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 		strcat(add_fields, ", rx_poll_cnt");
 		strcat(add_fields, ", scq_vector");
 		strcat(add_fields, ", rcq_vector");
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		strcat(add_fields, ", scq_irq");
 		strcat(add_fields, ", rcq_irq");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	}
 
 #ifndef WITHOUT_ORACLE_EXTENSIONS
@@ -654,10 +656,12 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 			printf("%15s", "Scq_vector");
 		if (strcasestr(add_fields, "rcq_vector"))
 			printf("%15s", "Rcq_vector");
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 		if (strcasestr(add_fields, "scq_irq"))
 			printf("%15s", "Scq_irq");
 		if (strcasestr(add_fields, "rcq_irq"))
 			printf("%15s", "Rcq_irq");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	}
 
 	printf("\n");
@@ -713,10 +717,12 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 					printf("%15"PRId32, ic6.scq_vector);
 				if (strcasestr(add_fields, "rcq_vector"))
 					printf("%15"PRId32, ic6.rcq_vector);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 				if (strcasestr(add_fields, "scq_irq"))
 					printf("%15"PRId32, ic6.scq_irq);
 				if (strcasestr(add_fields, "rcq_irq"))
 					printf("%15"PRId32, ic6.rcq_irq);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			}
 
 			printf("\n");
@@ -772,10 +778,12 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 					printf("%15"PRId32, ic.scq_vector);
 				if (strcasestr(add_fields, "rcq_vector"))
 					printf("%15"PRId32, ic.rcq_vector);
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 				if (strcasestr(add_fields, "scq_irq"))
 					printf("%15"PRId32, ic.scq_irq);
 				if (strcasestr(add_fields, "rcq_irq"))
 					printf("%15"PRId32, ic.rcq_irq);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			}
 
 			printf("\n");
