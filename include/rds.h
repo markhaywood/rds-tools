@@ -83,7 +83,9 @@
 
 /* supported values for SO_RDS_TRANSPORT */
 #define	RDS_TRANS_IB	0
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 #define	RDS_TRANS_LOOP	1
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 #define	RDS_TRANS_TCP	2
 #define	RDS_TRANS_COUNT	3
 #define	RDS_TRANS_NONE	(~0)
@@ -260,7 +262,9 @@ struct rds_info_socket {
 	__u64		inum;
 	pid_t		pid;
 	int32_t		cong;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u8		t_name[TRANSNAMSIZ];
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 } __attribute__((packed));
 
 struct rds6_info_socket {
@@ -273,7 +277,9 @@ struct rds6_info_socket {
 	__u64		inum;
 	pid_t		pid;
 	int32_t		cong;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u8		t_name[TRANSNAMSIZ];
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 } __attribute__((packed));
 
 struct rds_info_tcp_socket {
