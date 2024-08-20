@@ -217,37 +217,62 @@ static void print_sockets(void *data, int each, socklen_t len, void *extra,
 	else
 		prt_width = PRT_IPV4_WIDTH;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %10s %16s %8s %10s %16s\n",
 	       prt_width, "BoundAddr", "BPort", prt_width, "ConnAddr", "CPort",
 	       "SndBuf", "RcvBuf", "Inode", "TransName", "Cong", "Pid", "Comm");
+#else
+	printf("\nRDS Sockets:\n%*s %5s %*s %5s %10s %10s %10s %16s %10s %16s\n",
+	       prt_width, "BoundAddr", "BPort", prt_width, "ConnAddr", "CPort",
+	       "SndBuf", "RcvBuf", "Inode", "TransName", "Pid", "Comm");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
+
 
 	/* Initialize for compatibility with older kernels. */
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	sk6.cong = -1;
 	sk.cong = -1;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	if (prt_ipv6) {
 		for_each(sk6, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %5u %*s %5u %10u %10u %10llu %16s %8d",
+#else
+			printf("%*s %5u %*s %5u %10u %10u %10llu %16s",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&sk6.bound_addr, prt_ipv6),
 			       ntohs(sk6.bound_port),
 			       prt_width, ipaddr(&sk6.connected_addr, prt_ipv6),
 			       ntohs(sk6.connected_port),
 			       sk6.sndbuf, sk6.rcvbuf,
 			       (unsigned long long)sk6.inum,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       sk6.t_name, sk6.cong);
+#else
+			       sk6.t_name);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			if (get_comm(sk6.pid, comm, TASK_COMM_LEN) != -1)
 				printf(" %10u %16s", sk6.pid, comm);
 			printf("\n");
 		}
 	} else {
 		for_each(sk, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %5u %*s %5u %10u %10u %10llu %16s %8d",
+#else
+			printf("%*s %5u %*s %5u %10u %10u %10llu %16s",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&sk.bound_addr, prt_ipv6),
 			       ntohs(sk.bound_port),
 			       prt_width, ipaddr(&sk.connected_addr, prt_ipv6),
 			       ntohs(sk.connected_port),
 			       sk.sndbuf, sk.rcvbuf,
 			       (unsigned long long)sk.inum,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       sk.t_name, sk.cong);
+#else
+			       sk.t_name);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			if (get_comm(sk.pid, comm, TASK_COMM_LEN) != -1)
 				printf(" %10u %16s", sk.pid, comm);
 			printf("\n");
