@@ -441,30 +441,53 @@ static void print_msgs(void *data, int each, socklen_t len, void *extra,
 	else
 		prt_width = PRT_IPV4_WIDTH;
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	printf("\n%s Message Queue:\n%*s %5s %*s %5s %4s %16s %10s %10s\n",
+#else
+	printf("\n%s Message Queue:\n%*s %5s %*s %5s %4s %16s %10s\n",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	       (char *)extra,
 	       prt_width, "LocalAddr", "LPort", prt_width, "RemoteAddr",
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	       "RPort", "Tos", "Seq", "Bytes", "time_ms");
-
+#else
+	       "RPort", "Tos", "Seq", "Bytes");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	if (prt_ipv6) {
 		for_each(msg6, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u %10llu\n",
+#else
+			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u\n",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&msg6.laddr, prt_ipv6),
 			       ntohs(msg6.lport),
 			       prt_width, ipaddr(&msg6.faddr, prt_ipv6),
 			       ntohs(msg6.fport),
 			       msg6.tos,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       (uint64_t) msg6.seq, msg6.len, msg6.txrx_ms);
+#else
+			       (uint64_t) msg6.seq, msg6.len);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 		}
 	} else {
 		for_each(msg, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u %10llu\n",
+#else
+			printf("%*s %5u %*s %5u %4u %16"PRIu64" %10u\n",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&msg.laddr, prt_ipv6),
 			       ntohs(msg.lport),
 			       prt_width, ipaddr(&msg.faddr, prt_ipv6),
 			       ntohs(msg.fport),
 			       msg.tos,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       (uint64_t) msg.seq, msg.len, msg.txrx_ms);
+#else
+			       (uint64_t) msg.seq, msg.len);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 		}
 	}
 }
