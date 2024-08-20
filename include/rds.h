@@ -310,7 +310,9 @@ struct rds_info_rdma_connection {
 	__u32		rdma_mr_size;
 	__u8		tos;
 	__u8		sl;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u8            conn_state;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	__u32		cache_allocs;
 	__u32		frag;
 	__u16		flow_ctl_post_credit;
@@ -348,7 +350,9 @@ struct rds6_info_rdma_connection {
 	__u32		rdma_mr_size;
 	__u8		tos;
 	__u8		sl;
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	__u8            conn_state;
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 	__u32		cache_allocs;
 	__u32		frag;
 	__u16		flow_ctl_post_credit;
@@ -552,6 +556,7 @@ enum rds_hook_priorities {
 	NF_RDS_PRI_LAST  = INT_MAX
 };
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 enum {
 	CONN_STATE_DOWN = 0,
 	CONN_STATE_CONNECTING,
@@ -560,5 +565,6 @@ enum {
 	CONN_STATE_RESETTING,
 	CONN_STATE_ERROR
 };
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 #endif /* IB_RDS_H */

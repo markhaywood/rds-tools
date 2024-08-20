@@ -511,6 +511,7 @@ static void print_tcp_socks(void *data, int each, socklen_t len, void *extra,
 }
 
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 char* map_conn_state(int state) {
 	switch(state) {
 		case CONN_STATE_DOWN:
@@ -529,6 +530,7 @@ char* map_conn_state(int state) {
 			return "UNKNOWN";
 	}
 }
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 			   bool prt_ipv6)
@@ -563,9 +565,15 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 		strcat(add_fields, ", rcq_irq");
 	}
 
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 	printf("\nRDS IB Connections:\n%*s %*s %4s %3s %32s %32s %10s %10s %15s",
 	       prt_width, "LocalAddr", prt_width, "RemoteAddr", "Tos", "SL",
 	       "LocalDev", "RemoteDev", "SrcQPNo", "DstQPNo", "State");
+#else
+	printf("\nRDS IB Connections:\n%*s %*s %4s %3s %32s %32s %10s %10s",
+	       prt_width, "LocalAddr", prt_width, "RemoteAddr", "Tos", "SL",
+	       "LocalDev", "RemoteDev", "SrcQPNo", "DstQPNo");
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 	if (opt_add || opt_verbose) {
 		if (strcasestr(add_fields, "cache_allocs"))
@@ -608,15 +616,23 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 
 	if (prt_ipv6) {
 		for_each(ic6, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %*s %4u %3u %32s %32s %10d %10d %15s",
+#else
+			printf("%*s %*s %4u %3u %32s %32s %10d %10d",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&ic6.src_addr, prt_ipv6),
 			       prt_width, ipaddr(&ic6.dst_addr, prt_ipv6),
 			       ic6.tos, ic6.sl,
 			       ipv6addr(ic6.src_gid),
 			       ipv6addr(ic6.dst_gid),
 			       ic6.qp_num,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       ic6.dst_qp_num,
 			       map_conn_state(ic6.conn_state));
+#else
+			       ic6.dst_qp_num);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 			if (opt_add || opt_verbose) {
 				if (strcasestr(add_fields, "cache_allocs"))
@@ -659,15 +675,23 @@ static void print_ib_conns(void *data, int each, socklen_t len, void *extra,
 		}
 	} else {
 		for_each(ic, data, each, len) {
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			printf("%*s %*s %4u %3u %32s %32s %10d %10d %15s",
+#else
+			printf("%*s %*s %4u %3u %32s %32s %10d %10d",
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 			       prt_width, ipaddr(&ic.src_addr, prt_ipv6),
 			       prt_width, ipaddr(&ic.dst_addr, prt_ipv6),
 			       ic.tos, ic.sl,
 			       ipv6addr(ic.src_gid),
 			       ipv6addr(ic.dst_gid),
 			       ic.qp_num,
+#ifndef WITHOUT_ORACLE_EXTENSIONS
 			       ic.dst_qp_num,
 			       map_conn_state(ic.conn_state));
+#else
+			       ic.dst_qp_num);
+#endif /* !WITHOUT_ORACLE_EXTENSIONS */
 
 			if (opt_add || opt_verbose) {
 				if (strcasestr(add_fields, "cache_allocs"))
