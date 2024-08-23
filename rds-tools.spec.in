@@ -219,5 +219,6 @@ rm -rf %{buildroot}
 
 * Sun Nov 25 2007 Vladimir Sokolovsky <vlad@mellanox.co.il>
 - Use DESTDIR
-* Mon Oct 27 2006 Zach Brown <zach.brown@oracle.com>
+
+* Fri Oct 27 2006 Zach Brown <zach.brown@oracle.com>
 - initial version

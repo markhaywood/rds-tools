@@ -48,7 +48,7 @@ how to use the socket interface.
 %build
 autoconf
 %configure
-make CFLAGS="$CFLAGS -Iinclude" %{?_smp_mflags}
+make %{?_smp_mflags} uek=1
 
 %install
 rm -rf %{buildroot}

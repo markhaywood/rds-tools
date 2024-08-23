@@ -7,6 +7,9 @@ incdir		= $(DESTDIR)@includedir@
 all: all-programs
 
 CFLAGS = -O2 -Wall -Iinclude -g
+ifneq ($(UEK),1)
+CFLAGS += -DWITHOUT_ORACLE_EXTENSIONS
+endif
 CPPFLAGS = -DDEBUG_EXE -DRDS_VERSION=\"@VERSION@\" -MD -MP -MF $(@D)/.$(basename $(@F)).d
 
 rds-info : LDLIBS += -lcap -ldl
